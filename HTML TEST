@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <title>SafeShare - Compartilhamento de Localização</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <script src="https://maps.googleapis.com/maps/api/js?key=SUA_CHAVE_AQUI"></script>
+  <style>
+    .consent-box {
+      background: #f8f9fa;
+      padding: 20px;
+      margin: 20px;
+      border-radius: 8px;
+      border-left: 5px solid #4285f4;
+      box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+    }
+    .consent-box ul {
+      margin-top: 10px;
+      padding-left: 20px;
+    }
+    .consent-box li {
+      margin-bottom: 5px;
+    }
+  </style>
+</head>
+<body>
+  <div class="consent-box">
+    <h2>Fique tranquilo!</h2>
+    <p>Não vamos salvar nada, só mostrar onde você tá no mapa:</p>
+    <ul>
+      <li>📍 Sua posição some quando fechar a página</li>
+      <li>🔒 Não salvamos nem compartilhamos seus dados</li>
+      <li>🌐 Acesse de novo: <a href="https://www.instagram.com/nick.tb01" target="_blank">Instagram</a></li>
+    </ul>
+  </div>
+  <div id="map" style="height:500px; width:95%; margin:0 auto; border-radius:10px; box-shadow:0 0 15px rgba(0,0,0,0.1);"></div>
+  <script>
+    let permissionDenied = false;
+
+    function requestLocation() {
+      if (confirm("Opa, tudo bem?\n\nPermitir acesso à sua localização agora?\n\n👉 Só vamos usar pra mostrar no mapa\n👉 Não fica salvo\n👉 Pode recusar sem problema")) {
+        navigator.geolocation.getCurrentPosition(position => {
+          const { latitude, longitude } = position.coords;
+          const mapa = new google.maps.Map(document.getElementById("map"), {
+            center: { lat: latitude, lng: longitude },
+            zoom: 15
+          });
+          new google.maps.Marker({ position: { lat: latitude, lng: longitude }, map: mapa, title: "Sua localização atual" });
+        }, (error) => {
+          alert("Opa! Pedimos sua localização mas não conseguimos.\nErro: " + error.message + "\n\nTente atualizar a página!");
+        }, {
+          timeout: 10000,
+          maximumAge: 0,
+          enableHighAccuracy: true
+        });
+      } else {
+        if (!permissionDenied) {
+          document.getElementById('map').innerHTML = '<p style="padding:20px;text-align:center">Beleza, sem pressão! Vou perguntar de novo daqui a pouco...</p>';
+          setTimeout(requestLocation, 5000);
+          permissionDenied = true;
+        } else {
+          document.getElementById('map').innerHTML = '<p style="padding:20px;text-align:center">Tudo bem! Se mudar de ideia, é só atualizar a página 😉</p>';
+        }
+      }
+    }
+
+    // Inicia o primeiro pedido
+    requestLocation();
+  </script>
+</body>
+</html>
